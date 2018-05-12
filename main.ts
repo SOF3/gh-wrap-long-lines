@@ -3,7 +3,7 @@
 	if(blob === undefined){
 		return
 	}
-	const blobWidth = blob.clientWidth * 0.85 // 85% to play safe
+	const blobWidth = (blob.clientWidth - document.getElementById("L1").clientWidth) * 0.85 // 85% to play safe
 
 	const lineList = blob.getElementsByClassName("blob-code")
 
@@ -32,18 +32,22 @@
 
 	function breakLine(node: Node): boolean{
 		if(node instanceof Text){
-			if(currentLength + charWidth * node.textContent.length >= blobWidth){
+			const noTabsText = node.textContent.replace(/\t/g, "        ")
+			// actual number of spaces varies with .editorconfig, but let's assume it's 8 here, since we don't care getting too aggressive
+			if(currentLength + charWidth * noTabsText.length >= blobWidth){
 				if(currentLength > 0){
 					node.parentNode.insertBefore(document.createElement("br"), node)
 					currentLength = 0
 				}
-				if(charWidth * node.textContent.length >= blobWidth){
+				if(charWidth * noTabsText.length >= blobWidth){
 					let text = node.textContent
+					const tabsCount = text.length - text.replace(/\t/g, "").length // assume all tabs are at the beginning
 
-					while(text.length * charWidth >= blobWidth){
+					while(text.replace(/\t/g, "        ").length * charWidth >= blobWidth){
 						const span = document.createElement("span")
-						span.innerText = text.substr(0, Math.floor(blobWidth / charWidth))
-						text = text.substr(Math.floor(blobWidth / charWidth))
+						const cutLength = Math.floor(blobWidth / charWidth) - tabsCount * 7
+						span.innerText = text.substr(0, cutLength)
+						text = text.substr(cutLength)
 						node.parentNode.insertBefore(span, node)
 						node.parentNode.insertBefore(document.createElement("br"), node)
 					}

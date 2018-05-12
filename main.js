@@ -3,7 +3,7 @@
     if (blob === undefined) {
         return;
     }
-    var blobWidth = blob.clientWidth * 0.85; // 85% to play safe
+    var blobWidth = (blob.clientWidth - document.getElementById("L1").clientWidth) * 0.85; // 85% to play safe
     var lineList = blob.getElementsByClassName("blob-code");
     var charWidth = (function () {
         for (var i = 0; i < lineList.length; ++i) {
@@ -27,17 +27,21 @@
     }
     function breakLine(node) {
         if (node instanceof Text) {
-            if (currentLength + charWidth * node.textContent.length >= blobWidth) {
+            var noTabsText = node.textContent.replace(/\t/g, "        ");
+            // actual number of spaces varies with .editorconfig, but let's assume it's 8 here, since we don't care getting too aggressive
+            if (currentLength + charWidth * noTabsText.length >= blobWidth) {
                 if (currentLength > 0) {
                     node.parentNode.insertBefore(document.createElement("br"), node);
                     currentLength = 0;
                 }
-                if (charWidth * node.textContent.length >= blobWidth) {
+                if (charWidth * noTabsText.length >= blobWidth) {
                     var text = node.textContent;
-                    while (text.length * charWidth >= blobWidth) {
+                    var tabsCount = text.length - text.replace(/\t/g, "").length; // assume all tabs are at the beginning
+                    while (text.replace(/\t/g, "        ").length * charWidth >= blobWidth) {
                         var span_1 = document.createElement("span");
-                        span_1.innerText = text.substr(0, Math.floor(blobWidth / charWidth));
-                        text = text.substr(Math.floor(blobWidth / charWidth));
+                        var cutLength = Math.floor(blobWidth / charWidth) - tabsCount * 7;
+                        span_1.innerText = text.substr(0, cutLength);
+                        text = text.substr(cutLength);
                         node.parentNode.insertBefore(span_1, node);
                         node.parentNode.insertBefore(document.createElement("br"), node);
                     }
