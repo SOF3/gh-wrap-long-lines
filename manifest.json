@@ -1,0 +1,17 @@
+{
+	"manifest_version": 2,
+	"name": "gh-wrap-long-lines",
+	"version": "1.0.0",
+	"description": "Wrap long lines on GitHub blob view to fix the lag",
+	"content_scripts": [
+		{
+			"matches": [
+				"https://github.com/*/*/blob/*"
+			],
+			"js": [
+				"main.js"
+			],
+			"run_at": "document_idle"
+		}
+	]
+}
