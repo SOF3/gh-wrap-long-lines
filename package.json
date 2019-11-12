@@ -1,6 +1,6 @@
 {
 	"name": "chrome-wrap-gh-extension",
 	"devDependencies": {
-		"@types/chrome": "^0.0.65"
+		"@types/chrome": "^0.0.91"
 	}
 }
